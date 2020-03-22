@@ -48,45 +48,31 @@ ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len))
 
 ## As we have > 2 groups with what appear similar intergroup variance, we use ANOVA for testing significance (equal variance)
 
-## Start with ANOVA for DOSE:
-ANOVA_dose <- aov(len ~ dose, data = ToothGrowth)
+## Start with ANOVA for dose and for supp as well:
+ANOVA <- aov(len ~ dose+supp, data = ToothGrowth)
 
 ## Then we get the ANOVA summary:
-summary.aov(ANOVA_dose)
+summary.aov(ANOVA)
 
-## So, we have a statistically significant difference in Tooth Growth between the DOSES
+## So, we have a statistically significant difference in Tooth Growth between both the DOSES
+## and the 2 delivery methods
 ## We do not know which of the pairwise DOSE comparisons are significant, so now we need to do a TUKEK TEST)
-TukeyHSD(x = ANOVA_dose)
+ANOVA_dose_only <- aov(len ~ dose, data = ToothGrowth)
+TukeyHSD(x = ANOVA_dose_only)
 
 ## Which results in statistically significant differences between all 3 doses
-## The Mean and Confidence interval for ToowthGrowth for the 3 doses are listed(provided in the Tukey Test
 
+## The confidence intervals for the 3 doses are:
 
-### Confidence Intervals: the following info is already provided if we do the TUKEY tests:   
-### Summary_Stats <- ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len), St.Dev. = sd(len))
-### ToothGrowth <- ToothGrowth %>% arrange(dose)
-### Obtain vector with Toothh_Growth values at 0.5 mg/day dose
-### Dose0.5 <- ToothGrowth[1:20, 1]
-### Obtain 95% confidence intervals: t.test(Dose0.5)$conf
-### same for the other 2 doses -----
+Summary_Stats <- ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len), St.Dev. = sd(len))
 
-## In relation to TYPE of Vitamin C supplement, not advisable to test solely between VC vs OJ, as DOSE could
-## a confounder
-
-## So we do pairwise t-tests for each dose
-## First we need to sort the observations by dose  --otherwise pairwise won't work
 ToothGrowth <- ToothGrowth %>% arrange(dose)
 
-Dose0.5 <- ToothGrowth[1:20, ]
-Dose1 <- ToothGrowth[21:40, ]
-Dose2 <- ToothGrowth[41:60, ]
+## Obtain vector with Toothh_Growth values at 0.5 mg/day dose
+Dose0.5 <- ToothGrowth[1:20, 1]
 
-t.test(len ~ supp, data = Dose0.5)
-t.test(len ~ supp, data = Dose1)
-t.test(len ~ supp, data = Dose2)
+## Obtain 95% confidence intervals
+t.test(Dose0.5)$conf
 
-## This results ins statistical signifance for SUPPLEMENT TYPE for 0.5 & 1 mg/day doses, but not for 
-## the 2mg/day dose. 
-## So we have to conclude there is no conclusive data to support that SUPPLEMENT TYPE has a statistically 
-## significant effect over Tooth Growth
+## same for the other 3 doses -----
 

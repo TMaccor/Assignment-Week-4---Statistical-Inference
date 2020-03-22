@@ -1,0 +1,118 @@
+---
+title: "Effect of Vitamin C on Tooth Growth of Guinea pigs"
+author: "Tomás A. Maccor"
+date: "22/3/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This assignment explores whether 3 different doses & 2 different delivery methods of Vitamin C have an influence on the tooth lengths of Guinea pigs. The dataset used is **ToothGrowth**, which comes with R as one of its practice/sample datasets. 
+
+Each animal received one of 3 doses of vitamin C, by one of 2 delivery methods: ascorbic acid (VC) versus orange juice (OJ).
+
+This report comprises:
+
+- A basic/descritive statistics summary of our sample data, plus an exploratory analysis.
+- Use of statistical inference methods so that if any effects/conclusions are obtained from the SAMPLE data (contained in the ToothGrowth dataset), we can infer that these effects also apply to the entire population of Guinea pigs.
+
+
+## Summary of data & exploratory analysis
+
+
+```{r}
+library(tidyverse)
+library(reshape2)
+library(BSDA)
+
+## load Tooth Growth data
+
+data("ToothGrowth")
+head(ToothGrowth)
+```
+
+LEN = length of odontoblast.  NUMERIC variable
+SUPP = delivery method (VC or OJ).   FACTOR
+DOSE = Vitamin C dose: 0.5, 1 & 2 mg/day.    NUMERIC variable
+
+
+How many Guinea pigs received which dose, and by which method?:
+
+```{r}
+ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
+```
+
+So then  -20 pigs received each of the 3 doses ---> 10 via VC, 10 via OJ.
+
+Let's have a first visualization of the data:
+
+```{r}
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+
+dose_supp_plot <- ggplot(ToothGrowth, aes(x = dose, y = len, fill = supp))
+dose_supp_plot + geom_boxplot()
+```
+
+We can observe what could be a significant difference in Tooth Growth between the 0.5 mg/day dose
+versus the 1 & 2 mg/day doses. 
+We need to test for statistical significance to ascertain this.
+It would also appear there is a difference between delivering Vit_C via *VC* vs *OJ* for the *0.5* and *1mg/day* doses.
+
+If we plot the tooth growth differences by Vitamin C Dose only, and obtain the means for the 3 different Vit C doses:
+
+```{r}
+dose_plot <- ggplot(ToothGrowth, aes(x = dose, y = len))
+dose_plot + geom_boxplot()
+
+ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len))
+```
+
+This time, it could well be that there's statistical difference between all 3 doses.
+
+As we have > 2 groups with what appear similar intergroup variance, we use ANOVA for testing significance (equal variance).
+
+So far, our assumptions are:
+- That tooth growth in Guinea pigs is normally distributed
+- That the 3 different DOSE groups have an equal variance
+
+```{r}
+ANOVA_dose <- aov(len ~ dose, data = ToothGrowth)
+summary.aov(ANOVA_dose)
+```
+
+So, per ANOVA, we have a statistically significant difference in Mean Tooth Growth between the 3 DOSES (p < 0.05 for the 3 doses).
+
+But, ANOVA does not allow to know which of the pairwise DOSE comparisons are significant  --so now we perform TUKEY TEST to determine this:
+
+
+```{r}
+TukeyHSD(ANOVA_dose)
+```
+
+Which also results in statistically significant differences between all 3 doses (p < 0.05).
+The *differences between the mean DOSES* and their *confidence intervals for those mean differences* are listed(provided) in the Tukey Test.
+
+So for example, we can state that if the entire population of Guinea pigs was given Vitamin C at 3 doses, and we took random samples of these pigs, 95% of the times we would obtain a Mean difference in Tooth Growth that would be between 5.90 to 12.36 (in the 0.5 mg vs. 1.0 mg/day Vitamin C groups). 
+
+
+In relation to the TYPE of Vitamin C supplement, it is not advisable to test solely between VC vs OJ, as DOSE could a confounder in this relation.
+
+So we do pairwise t-tests for each dose
+
+```{r}
+ToothGrowth <- ToothGrowth %>% arrange(dose)
+Dose0.5 <- ToothGrowth[1:20, ]
+Dose1 <- ToothGrowth[21:40, ]
+Dose2 <- ToothGrowth[41:60, ]
+
+t.test(len ~ supp, data = Dose0.5)
+t.test(len ~ supp, data = Dose1)
+t.test(len ~ supp, data = Dose2)
+
+```
+
+
