@@ -62,3 +62,16 @@ TukeyHSD(x = ANOVA_dose_only)
 
 ## Which results in statistically significant differences between all 3 doses
 
+## The confidence intervals for the 3 doses are:
+
+Summary_Stats <- ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len), St.Dev. = sd(len))
+
+ToothGrowth <- ToothGrowth %>% arrange(dose)
+
+## Obtain vector with Toothh_Growth values at 0.5 mg/day dose
+Dose0.5 <- ToothGrowth[1:20, 1]
+
+## Obtain 95% confidence intervals
+t.test(Dose0.5)$conf
+
+## same for the other 3 doses -----
