@@ -6,7 +6,6 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Introduction
@@ -23,11 +22,10 @@ This report comprises:
 
 ## Summary of data & exploratory analysis
 
+First glimpse of the ToothGrowth dataset:
 
-```{r}
-library(tidyverse)
-library(reshape2)
-library(BSDA)
+```{r echo=FALSE}
+library(ggplot2)
 
 ## load Tooth Growth data
 
@@ -42,8 +40,9 @@ DOSE = Vitamin C dose: 0.5, 1 & 2 mg/day.    NUMERIC variable
 
 How many Guinea pigs received which dose, and by which method?:
 
-```{r}
-ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
+```{r results = 'asis'}
+Summary_Stats <- ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
+knitr::kable(Summary_Stats, caption = "Nr. observations in each group”)
 ```
 
 So then  -20 pigs received each of the 3 doses ---> 10 via VC, 10 via OJ.

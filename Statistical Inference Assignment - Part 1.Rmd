@@ -1,0 +1,85 @@
+---
+title: "Statistical Inference Assignment - Part 1"
+author: "Tomás A. Maccor"
+date: "23/3/2020"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+library(ggplot2)
+
+```
+
+## Synopsis
+
+In this assigment we are going to verify if the postulates of the Central Limit Theorem (CLT) stand for an exponential distribution density. That is, as we obtain a higher **N** of random samples from an an Exponention distribution, the distribution of the mean of each of these N random sampless will approximate a Normal distribution (regardless of the fact that the samples are obtained from an exponential distribution density). 
+
+We will also try to prove another of the CLT postulates: that the average of the sample means will be the population mean. In other words, if we add up the means from all of the samples & calculate the average ----> that average will be the actual population mean. The same can be applied for finding the standard deviation of your population (distribution, in this case)
+
+## Basic Facts
+
+### EXPONENTIAL distribution parameters
+Mean =  1/\( \lambda \)    
+\( \lambda \) (lambda) = rate parameter for the distribution
+St. dev. = 1/\( \lambda \)
+
+We will work with an exponential distribution that has \( \lambda \) = 0.2
+Therefore, the mean of this particular distribution is 0.5 (1/0.2)
+
+## Simulation
+We will simulate obtaining 1000 samples from an exponential distribution with \( \lambda \)=0.2, each of size 40 (n=40).  
+So here we go:
+
+
+```{r echo=TRUE}
+averages <- NULL
+
+for (i in 1:1000)
+{ 
+  averages <- c(averages, mean(rexp(40, 0.2)))
+}
+
+str(averages)
+
+```
+
+The average of the 1000 sample means is
+```{r echo=FALSE}
+print(mean(averages))
+```
+
+This is almost identical to the theoretical mean for an exponential distribution with \( \lambda \) = 0.2
+
+Our original standard deviation is the same as the mean, 1 / lambda, so we just have to square it to get the variance for the exponential distribution with \( \lambda \) = 0.2:
+
+```{r echo=TRUE}
+theoreticalVariance <- (1/0.2)^2 / 40
+print(theoreticalVariance)
+```
+
+If we then calculate the variance of our own sampling data, we get a close approximation:
+
+```{r echo=TRUE}
+print(var(averages))
+```
+
+
+```{r}
+data <- data.frame(x = averages )
+
+ggplot(data = data, aes(x = x)) + 
+        geom_histogram(
+                aes(y = ..density..),
+                binwidth = 0.15,
+                color = I("black"), 
+                fill = I("blue")) + 
+        stat_function(
+                fun = dnorm, 
+                arg = list(mean = mean(averages), sd = sqrt(theoreticalVariance)), 
+                size = 1.2) + 
+        labs(
+                title = "Sampling Distribution of the Sample Means",
+                x = "Sample Means",
+                y = "Frequency")

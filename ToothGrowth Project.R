@@ -1,7 +1,5 @@
 
-library(tidyverse)
-library(reshape2)
-library(BSDA)
+library(ggplot2)
 
 ## load Tooth Growth data
 
