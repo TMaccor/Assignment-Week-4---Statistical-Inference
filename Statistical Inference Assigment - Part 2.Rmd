@@ -25,24 +25,25 @@ This report comprises:
 First glimpse of the ToothGrowth dataset:
 
 ```{r echo=FALSE}
-library(ggplot2)
+library(ggplot2, quietly = TRUE)
+library(dplyr, quietly = TRUE, warn.conflicts = FALSE)
 
 ## load Tooth Growth data
 
 data("ToothGrowth")
-head(ToothGrowth)
+str(ToothGrowth)
 ```
 
-LEN = length of odontoblast.  NUMERIC variable
-SUPP = delivery method (VC or OJ).   FACTOR
-DOSE = Vitamin C dose: 0.5, 1 & 2 mg/day.    NUMERIC variable
+LEN = length of odontoblast.  NUMERIC variable   
+SUPP = delivery method (VC or OJ).   FACTOR   
+DOSE = Vitamin C dose: 0.5, 1 & 2 mg/day.    NUMERIC variable   
 
 
 How many Guinea pigs received which dose, and by which method?:
 
 ```{r results = 'asis'}
-Summary_Stats <- ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
-knitr::kable(Summary_Stats, caption = "Nr. observations in each group”)
+a <- ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
+knitr::kable((a), caption = "Nr. of observations in each group")
 ```
 
 So then  -20 pigs received each of the 3 doses ---> 10 via VC, 10 via OJ.
@@ -67,7 +68,8 @@ If we plot the tooth growth differences by Vitamin C Dose only, and obtain the m
 dose_plot <- ggplot(ToothGrowth, aes(x = dose, y = len))
 dose_plot + geom_boxplot()
 
-ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len))
+b <- ToothGrowth %>% group_by(dose) %>% summarise(Mean_Tooth_Growth = mean(len))
+knitr::kable(b)
 ```
 
 This time, it could well be that there's statistical difference between all 3 doses.
@@ -83,7 +85,7 @@ ANOVA_dose <- aov(len ~ dose, data = ToothGrowth)
 summary.aov(ANOVA_dose)
 ```
 
-So, per ANOVA, we have a statistically significant difference in Mean Tooth Growth between the 3 DOSES (p < 0.05 for the 3 doses).
+So, per ANOVA, we have a statistically significant difference in Mean Tooth Growth between the 3 DOSES (p = 9.53e-16, thus p < 0.05).
 
 But, ANOVA does not allow to know which of the pairwise DOSE comparisons are significant  --so now we perform TUKEY TEST to determine this:
 

@@ -1,5 +1,5 @@
 
-library(ggplot2)
+library(tidyverse)
 
 ## load Tooth Growth data
 
@@ -19,7 +19,7 @@ table(ToothGrowth$dose)
 ## So there are 3 doses:  0.5   1   2
 
 ## How many pigs received each dose and by which method?
-ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
+Summary_Stats <- ToothGrowth %>% group_by(dose, supp) %>% summarise(n = n())
 
 ## 20 pigs received each dose ---> 10 via VC, 10 via OJ
 
