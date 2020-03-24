@@ -1,0 +1,127 @@
+---
+title: "Statistical Inference Assignment - Part 1"
+author: "Tomás A. Maccor"
+date: "23/3/2020"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+library(ggplot2)
+library(ggpubr)
+
+```
+
+## Synopsis
+
+In this assigment we are going to verify if the postulates of the Central Limit Theorem (CLT) stand for an exponential distribution density. That is, as we obtain a higher **N** of random samples from an an Exponention distribution, the distribution of the mean of each of these N random sampless will approximate a Normal distribution (regardless of the fact that the samples are obtained from an exponential distribution density). 
+
+We will also try to prove another of the CLT postulates: that the average of the sample means will be the population mean. In other words, if we add up the means from all of the samples & calculate the average ----> that average will be the actual population mean. 
+The same can be applied for finding the standard deviation of your population (distribution, in this case)
+
+## Basic Facts
+
+### EXPONENTIAL distribution parameters
+Mean =  1/\( \lambda \)    
+\( \lambda \) (lambda) = rate parameter for the distribution   
+St. dev. = 1/\( \lambda \)
+
+We will work with an exponential distribution that has \( \lambda \) = 0.2   
+Therefore, \( \mu \) = 0.5  (1/0.2)
+
+## Simulation
+We will simulate obtaining 1000 samples from an exponential distribution with \( \lambda \)=0.2, each of size 40 (n=40).  
+So here we go:
+
+
+```{r echo=TRUE}
+
+averages <- NULL
+
+for (i in 1:1000)
+{ 
+  averages <- c(averages, mean (rexp (40, 0.2) ) )
+}
+```
+
+
+
+
+``` {r}
+str(averages)
+```
+
+"averages" is a vector of length = 1000 ---> each element of vector the contains the MEAN of a sample of size n = 40.
+
+\break
+
+   
+## Mean & SD of SAMPLE approximate Mean & Sd of POPULATION    
+   
+### Mean
+
+The average of the 1000 sample means is
+```{r echo=TRUE}
+print(mean(averages))
+```
+
+This is almost identical to the theoretical mean for an exponential distribution with \( \lambda \) = 0.2  (which is 0.5, as we saw earlier).
+   
+   
+### Standard deviation
+Our original standard deviation is the same as the mean, 1 / lambda, so we just have to exponentiate it to get the variance for the exponential distribution with \( \lambda \) = 0.2:
+
+```{r echo=TRUE}
+theoreticalVariance <- (1/0.2)^2 / 40
+print(theoreticalVariance)
+```
+
+If we then calculate the variance of our own sampling data, we get a close approximation:
+
+```{r echo=TRUE}
+print(var(averages))
+```
+
+   
+\break   
+   
+Now we will show that the distribution of the means of 1000 samples (size n=40) taken from an exponential distribution, actually follow a Normal distribution!    
+
+We will first plot how does an exponential distribution of size=1000 looks like:
+
+```{r echo=FALSE, warning=FALSE, error=FALSE}
+## Obtain 1000 random Nrs. in exponential distribution
+exponential <- rexp(1000, 0.2)
+
+## Transform the 2 obtained vectors into dataframes (otherwise cannot use GGPLOT2 with them)
+expo_df <- data.frame(x_expo = exponential)
+averages_df <- data.frame(x_average = averages )
+
+## Plotting
+theoreticalMean <- 1 / 0.2
+theoreticalVariance <- (1/0.2)^2 / 40
+
+expo_plot <- ggplot(expo_df, aes(x_expo)) + geom_histogram(binwidth = 0.5, color = "black", fill = "red") + 
+             ggtitle("Exponential Distribution - 1000 random values") +
+             theme(axis.title.x = element_blank()) + ylab("Count")
+expo_plot
+```
+   
+   
+   
+   
+And now we plot the distribution of the means of our 1000 samples, and compare it to the curve of a Normal distribution with u and sd equal to the theoretical exponential distribution u and sd:
+
+
+
+``` {r}
+sample_plot <- ggplot(averages_df, aes(x_average)) +
+                geom_histogram(aes(y = ..density..), binwidth = 0.15, color = "black", fill = "blue") +
+                ggtitle("Exponential Distribution - 1000 means from random samples (n=40)") +
+                xlab("Sample Means") +
+                stat_function(fun = dnorm, args = list(mean = theoreticalMean, sd = sqrt(theoreticalVariance)), 
+                                size = 1.2)
+
+sample_plot
+```
